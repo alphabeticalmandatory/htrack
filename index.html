@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Habit Tracker</title>
+
+    <!-- Google Font (eye-soothing, e.g., Open Sans) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- React and ReactDOM from CDN -->
+    <script
+      crossorigin
+      src="https://unpkg.com/react@17/umd/react.development.js"
+    ></script>
+    <script
+      crossorigin
+      src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"
+    ></script>
+
+    <!-- Material UI (MUI) from CDN -->
+    <script src="https://unpkg.com/@mui/material@latest/umd/material-ui.development.js"></script>
+    <script src="https://unpkg.com/@emotion/react@latest/umd/emotion-react.umd.min.js"></script>
+    <script src="https://unpkg.com/@emotion/styled@latest/umd/emotion-styled.umd.min.js"></script>
+
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        background-color: #fafafa;
+        font-family: "Open Sans", sans-serif;
+      }
+      .pointer {
+        cursor: pointer;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+      // Import necessary MUI components from the global MaterialUI object
+      const {
+        createTheme,
+        ThemeProvider,
+        CssBaseline,
+        Container,
+        Typography,
+        Box,
+        TextField,
+        Button,
+        Table,
+        TableBody,
+        TableCell,
+        TableContainer,
+        TableHead,
+        TableRow,
+        Paper,
+      } = MaterialUI;
+
+      // Create a light theme using MUI
+      const theme = createTheme({
+        palette: {
+          mode: "light",
+        },
+        typography: {
+          fontFamily: "Open Sans, sans-serif",
+        },
+      });
+
+      function HabitTracker() {
+        // State for the habit names (each habit is a column)
+        const [habits, setHabits] = React.useState(["Reading", "Yoga"]);
+
+        // Each row is a day/entry with a 'date' and a 'progress' array
+        // 'progress' matches the habits array in length
+        const [rows, setRows] = React.useState([
+          { date: "2025-03-18", progress: [false, false] },
+        ]);
+
+        // State for new habit text input
+        const [newHabit, setNewHabit] = React.useState("");
+
+        // Add a new habit (column) to the table
+        const addHabit = () => {
+          if (!newHabit.trim()) return; // Prevent empty habit names
+          setHabits((prev) => [...prev, newHabit.trim()]);
+
+          // For each row, add a new 'false' (unchecked) in progress
+          setRows((prev) =>
+            prev.map((row) => ({
+              ...row,
+              progress: [...row.progress, false],
+            }))
+          );
+          setNewHabit("");
+        };
+
+        // Add a new row (e.g., a new day) with default false progress
+        const addRow = () => {
+          const today = new Date().toISOString().split("T")[0];
+          setRows((prev) => [
+            ...prev,
+            {
+              date: today,
+              progress: new Array(habits.length).fill(false),
+            },
+          ]);
+        };
+
+        // Toggle the checkbox for a given rowIndex, habitIndex
+        const toggleProgress = (rowIndex, habitIndex) => {
+          setRows((prev) => {
+            const updated = [...prev];
+            updated[rowIndex].progress[habitIndex] =
+              !updated[rowIndex].progress[habitIndex];
+            return updated;
+          });
+        };
+
+        return (
+          <ThemeProvider theme={theme}>
+            <CssBaseline />
+            <Container maxWidth="md">
+              <Box sx={{ mt: 4, mb: 2 }}>
+                <Typography variant="h4" gutterBottom>
+                  Habit Tracker
+                </Typography>
+
+                {/* Section to add a new habit */}
+                <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+                  <TextField
+                    label="New Habit"
+                    variant="outlined"
+                    value={newHabit}
+                    onChange={(e) => setNewHabit(e.target.value)}
+                    sx={{ mr: 2 }}
+                  />
+                  <Button variant="contained" onClick={addHabit}>
+                    Add Habit
+                  </Button>
+                </Box>
+
+                {/* Button to add a new row */}
+                <Button variant="contained" onClick={addRow} sx={{ mb: 2 }}>
+                  Add Row (New Day)
+                </Button>
+
+                {/* Table of habits (columns) and days (rows) */}
+                <TableContainer component={Paper}>
+                  <Table>
+                    <TableHead>
+                      <TableRow>
+                        <TableCell>Date</TableCell>
+                        {habits.map((habit, index) => (
+                          <TableCell key={index}>{habit}</TableCell>
+                        ))}
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {rows.map((row, rowIndex) => (
+                        <TableRow key={rowIndex}>
+                          <TableCell>{row.date}</TableCell>
+                          {row.progress.map((checked, habitIndex) => (
+                            <TableCell
+                              key={habitIndex}
+                              className="pointer"
+                              onClick={() => toggleProgress(rowIndex, habitIndex)}
+                            >
+                              {checked ? "✔️" : "❌"}
+                            </TableCell>
+                          ))}
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              </Box>
+            </Container>
+          </ThemeProvider>
+        );
+      }
+
+      // Render the component into the #root element
+      ReactDOM.render(<HabitTracker />, document.getElementById("root"));
+    </script>
+  </body>
+</html>
