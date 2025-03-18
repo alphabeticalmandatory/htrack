@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Habit Tracker</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <!-- Material Icons -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 100%;
+            overflow-x: auto;
+        }
+        table {
+            border-collapse: collapse;
+            background: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border-radius: 8px;
+        }
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+        }
+        .add-button {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <!-- React & Material UI CDNs -->
+    <script src="https://unpkg.com/react@17/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@emotion/react@11.11.1/dist/emotion-react.umd.min.js"></script>
+    <script src="https://unpkg.com/@emotion/styled@11.11.0/dist/styled.umd.min.js"></script>
+    <script src="https://unpkg.com/@mui/material@5.14.2/umd/material-ui.development.js"></script>
+    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+
+    <script type="text/babel">
+        const { useState } = React;
+        const {
+            Button,
+            TextField,
+            Checkbox,
+            styled
+        } = MaterialUI;
+
+        const StyledTable = styled('table')({
+            borderCollapse: 'collapse',
+            background: 'white',
+            boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+            borderRadius: '8px',
+            width: '100%',
+        });
+
+        function App() {
+            const [habits, setHabits] = useState(['Exercise', 'Reading', 'Notes']);
+            const [entries, setEntries] = useState({});
+            
+            const addHabit = () => {
+                const newHabit = prompt('Enter new habit name:');
+                if (newHabit) {
+                    setHabits([...habits, newHabit]);
+                }
+            };
+
+            const handleCheckboxChange = (date, habitIndex) => {
+                setEntries(prev => ({
+                    ...prev,
+                    [date]: {
+                        ...prev[date],
+                        [habitIndex]: !prev[date]?.[habitIndex]
+                    }
+                }));
+            };
+
+            const handleNotesChange = (date, notes) => {
+                setEntries(prev => ({
+                    ...prev,
+                    [date]: {
+                        ...prev[date],
+                        notes
+                    }
+                }));
+            };
+
+            const generateDates = () => {
+                const dates = [];
+                for (let i = 1; i <= 30; i++) {
+                    dates.push(`Date ${i}`);
+                }
+                return dates;
+            };
+
+            return (
+                <div className="container">
+                    <Button 
+                        variant="contained" 
+                        color="primary"
+                        className="add-button"
+                        onClick={addHabit}
+                        startIcon={<span className="material-icons">add</span>}
+                    >
+                        Add Habit
+                    </Button>
+                    
+                    <StyledTable>
+                        <thead>
+                            <tr>
+                                <th>Sl no.</th>
+                                {habits.map((habit, index) => (
+                                    <th key={index}>{habit}</th>
+                                ))}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {generateDates().map((date, dateIndex) => (
+                                <tr key={dateIndex}>
+                                    <td>{dateIndex + 1}</td>
+                                    {habits.map((habit, habitIndex) => {
+                                        if (habit === 'Notes') {
+                                            return (
+                                                <td key={habitIndex}>
+                                                    <TextField
+                                                        size="small"
+                                                        value={entries[date]?.notes || ''}
+                                                        onChange={(e) => handleNotesChange(date, e.target.value)}
+                                                        placeholder="Add notes"
+                                                        variant="outlined"
+                                                    />
+                                                </td>
+                                            );
+                                        }
+                                        return (
+                                            <td key={habitIndex}>
+                                                <Checkbox
+                                                    checked={entries[date]?.[habitIndex] || false}
+                                                    onChange={() => handleCheckboxChange(date, habitIndex)}
+                                                    color="primary"
+                                                />
+                                            </td>
+                                        );
+                                    })}
+                                </tr>
+                            ))}
+                        </tbody>
+                    </StyledTable>
+                </div>
+            );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>
